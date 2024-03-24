@@ -1,28 +1,27 @@
-function functionOfArity(func, arity) {
+function functionOfArity(func, arity, storedProvidedArguments) {
     if (arity === 4) {
         return (a, b, c, d) => {
-            return func(a, b, c, d);
+            return func(storedProvidedArguments, a, b, c, d);
         };
     } else if (arity === 3) {
         return (a, b, c) => {
-            return func(a, b, c);
+            return func(storedProvidedArguments, a, b, c);
         };
     } else if (arity === 2) {
         return (a, b) => {
-            return func(a, b);
+            return func(storedProvidedArguments, a, b);
         };
     } else if (arity === 1) {
         return (a) => {
-            return func(a);
+            return func(storedProvidedArguments, a);
         };
     }
 }
 
 function curry(func) {
-    let providedArguments = [];
     const numOfParametersInFunc = func.length;
 
-    function curriedFunction(...args) {
+    function curriedFunction(providedArguments = [], ...args) {
         const passedInArguments = args.filter((arg) => arg !== undefined);
         providedArguments = [...providedArguments, ...passedInArguments];
 
@@ -32,11 +31,12 @@ function curry(func) {
 
         return functionOfArity(
             curriedFunction,
-            numOfParametersInFunc - providedArguments.length
+            numOfParametersInFunc - providedArguments.length,
+            providedArguments
         );
     }
 
-    return functionOfArity(curriedFunction, numOfParametersInFunc);
+    return functionOfArity(curriedFunction, numOfParametersInFunc, []);
 }
 
 export default curry;
