@@ -38,4 +38,12 @@ describe('curry', () => {
         const h = g(3);
         expect(h.length).toBe(2);
     });
+    it('preserves context', function () {
+        const ctx = { x: 10 };
+        const mockedFunctionToCurry = jest.fn((a, b) => a + b * this.x);
+        const f = curry(mockedFunctionToCurry);
+
+        expect(f.call(ctx, 2, 4)).toBe(42);
+        expect(f.call(ctx, 2).call(ctx, 4)).toBe(42);
+    });
 });
