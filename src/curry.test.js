@@ -27,7 +27,7 @@ describe('curry', () => {
 
         const h = g(3);
 
-        expect(h(6, 2)).toEqual(14);
+        expect(h(6, 2)).toEqual(15);
         expect(g(3, 6)(2)).toEqual(15);
     });
     it('properly reports the length of the curried function', () => {
@@ -43,12 +43,14 @@ describe('curry', () => {
         expect(typeof g(3, 6)).toEqual('function');
         expect(g(3, 6).length).toBe(1);
     });
-    it.skip('preserves context', function () {
+    it('preserves context', function () {
         const ctx = { x: 10 };
-        const mockedFunctionToCurry = jest.fn((a, b) => a + b * this.x);
-        const f = curry(mockedFunctionToCurry);
+        const f = jest.fn(function (a, b) {
+            a + b * this.x;
+        });
+        const g = curry(f);
 
-        expect(f.call(ctx, 2, 4)).toBe(42);
-        expect(f.call(ctx, 2).call(ctx, 4)).toBe(42);
+        expect(g.call(ctx, 2, 4)).toEqual(42);
+        expect(g.call(ctx, 2).call(ctx, 4)).toEqual(42);
     });
 });
