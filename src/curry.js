@@ -32,10 +32,14 @@ function curry(func) {
 
         if (isRemainingArguments) {
             return functionOfArity((...args) => {
-                return curriedFunction(...passedInArguments, ...args);
+                return curriedFunction.call(
+                    this,
+                    ...passedInArguments,
+                    ...args
+                );
             }, arityOfCurriedFunction - passedInArguments.length);
         } else {
-            return func(...passedInArguments);
+            return func.call(this, ...passedInArguments);
         }
     }
 
