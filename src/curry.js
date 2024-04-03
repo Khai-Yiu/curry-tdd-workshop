@@ -19,30 +19,26 @@ function functionOfArity(func, arity) {
                 return func.apply(this, arguments);
             };
         default:
-            break;
+            return function (...args) {
+                return func.apply(this, arguments);
+            };
     }
 }
 
-function replacePlaceholders(currentArguments, args) {
+function replacePlaceholders(currentProvidedArguments, args) {
     const newArguments = [...args];
-    let argIndex = 0;
-    const partiallyReplacedArguments = currentArguments.map((argument) => {
-        if (argument === _ && argIndex < newArguments.length) {
-            const argumentToReplace = newArguments[argIndex];
-            argIndex++;
+    const partiallyReplacedArguments = currentProvidedArguments.reduce(
+        (replacedArguments, currentArgument) => {
+            if (currentArgument === _ && newArguments.length > 0) {
+                return [...replacedArguments, newArguments.shift()];
+            } else {
+                return [...replacedArguments, currentArgument];
+            }
+        },
+        []
+    );
 
-            return argumentToReplace;
-        } else {
-            return argument;
-        }
-    });
-
-    let remainingArguments = [];
-    for (let i = argIndex; i < args.length; i++) {
-        remainingArguments = [...remainingArguments, newArguments[i]];
-    }
-
-    return [partiallyReplacedArguments, remainingArguments];
+    return [...partiallyReplacedArguments, ...newArguments];
 }
 
 function curry(func) {
@@ -58,16 +54,17 @@ function curry(func) {
 
         const isRemainingArguments =
             arityOfCurriedFunction - currentNumberOfArguments > 0;
+        const containsPlaceholder = passedInArguments.find(
+            (currentArgument) => currentArgument === _
+        );
 
-        if (isRemainingArguments) {
+        if (isRemainingArguments || containsPlaceholder) {
             return functionOfArity((...args) => {
-                const [partiallyReplacedArguments, remainingArguments] =
-                    replacePlaceholders(passedInArguments, args);
-                return curriedFunction.call(
-                    this,
-                    ...partiallyReplacedArguments,
-                    ...remainingArguments
+                const newArgumentsToPassIn = replacePlaceholders(
+                    passedInArguments,
+                    args
                 );
+                return curriedFunction.call(this, ...newArgumentsToPassIn);
             }, arityOfCurriedFunction - currentNumberOfArguments);
         } else {
             return func.call(this, ...passedInArguments);
