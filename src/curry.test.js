@@ -124,4 +124,49 @@ describe('curry', () => {
         eq(g(_, _, _)(1, _, _)(_, _)(2, _)(_)(3), [1, 2, 3]);
         eq(g(_)(_, 2, _, 4, 5)(1, 3), [1, 2, 3]);
     });
+    it('passes along all arguments from previous calls including placeholder', function () {
+        const f = function () {
+            return [...arguments];
+        };
+        const g = curry(f);
+
+        function eq(result, expected) {
+            return expect(result).toEqual(expected);
+        }
+
+        eq(g(_)(_, 2, _, 4, 5)(1, 3), [1, 2, 3, 4, 5]);
+        eq(
+            g(_, 2, 3, 4)(_, 5, 6)(_, 7, 8, 9)(1, 10),
+            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        );
+        eq(g(1), [1]);
+        eq(g(), []);
+    });
+    describe('curry properties', function () {
+        it('curries multiple values', function () {
+            fc.assert(
+                fc.property(
+                    fc.func(fc.anything()),
+                    fc.anything(),
+                    fc.anything(),
+                    fc.anything(),
+                    fc.anything(),
+                    function (f, a, b, c, d) {
+                        var f4 = function (a, b, c, d) {
+                            return f(a, b, c, d);
+                        };
+                        var g = R.curry(f4);
+
+                        return R.all(R.equals(f4(a, b, c, d)), [
+                            g(a, b, c, d),
+                            g(a)(b)(c)(d),
+                            g(a)(b, c, d),
+                            g(a, b)(c, d),
+                            g(a, b, c)(d)
+                        ]);
+                    }
+                )
+            );
+        });
+    });
 });
