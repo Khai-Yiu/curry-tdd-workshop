@@ -88,4 +88,21 @@ describe('curry', () => {
         eq(g(_, _, _)(_, _)(_)(1, 2, 3), [1, 2, 3]);
         eq(g(_, _, _)(1, _, _)(_, _)(2, _)(_)(3), [1, 2, 3]);
     });
+    it('forwards extra arguments', function () {
+        const f = function (a, b, c) {
+            void c;
+            return Array.prototype.slice.call(arguments);
+        };
+        const g = curry(f);
+
+        function eq(result, expected) {
+            return expect(result).toEqual(expected);
+        }
+
+        eq(g(1, 2, 3), [1, 2, 3]);
+        eq(g(1, 2, 3, 4), [1, 2, 3, 4]);
+        eq(g(1, 2)(3, 4), [1, 2, 3, 4]);
+        eq(g(1)(2, 3, 4), [1, 2, 3, 4]);
+        eq(g(1)(2)(3, 4), [1, 2, 3, 4]);
+    });
 });
