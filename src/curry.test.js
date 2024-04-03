@@ -1,5 +1,6 @@
 import curry from './curry';
 import _ from './_';
+import fc from 'fast-check';
 
 describe('curry', () => {
     it('curries a single value', () => {
@@ -142,8 +143,8 @@ describe('curry', () => {
         eq(g(1), [1]);
         eq(g(), []);
     });
-    describe('curry properties', function () {
-        it('curries multiple values', function () {
+    describe('curry properties', () => {
+        it('curries multiple values', () => {
             fc.assert(
                 fc.property(
                     fc.func(fc.anything()),
@@ -152,18 +153,16 @@ describe('curry', () => {
                     fc.anything(),
                     fc.anything(),
                     function (f, a, b, c, d) {
-                        var f4 = function (a, b, c, d) {
+                        const f4 = function (a, b, c, d) {
                             return f(a, b, c, d);
                         };
-                        var g = R.curry(f4);
+                        const g = curry(f4);
 
-                        return R.all(R.equals(f4(a, b, c, d)), [
-                            g(a, b, c, d),
-                            g(a)(b)(c)(d),
-                            g(a)(b, c, d),
-                            g(a, b)(c, d),
-                            g(a, b, c)(d)
-                        ]);
+                        expect(g(a, b, c, d)).toEqual(f4(a, b, c, d));
+                        expect(g(a)(b)(c)(d)).toEqual(f4(a, b, c, d));
+                        expect(g(a)(b, c, d)).toEqual(f4(a, b, c, d));
+                        expect(g(a, b)(c, d)).toEqual(f4(a, b, c, d));
+                        expect(g(a, b, c)(d)).toEqual(f4(a, b, c, d));
                     }
                 )
             );
