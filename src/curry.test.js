@@ -167,5 +167,27 @@ describe('curry', () => {
                 )
             );
         });
+        it('curries with placeholder', () => {
+            fc.assert(
+                fc.property(
+                    fc.func(fc.anything()),
+                    fc.anything(),
+                    fc.anything(),
+                    fc.anything(),
+                    function (f, a, b, c) {
+                        const f3 = function (a, b, c) {
+                            return f(a, b, c);
+                        };
+                        const g = curry(f3);
+
+                        expect(g(_, _, c)(a, b)).toEqual(f3(a, b, c));
+                        expect(g(a, _, c)(b)).toEqual(f3(a, b, c));
+                        expect(g(_, b, c)(a)).toEqual(f3(a, b, c));
+                        expect(g(a, _, _)(_, c)(b)).toEqual(f3(a, b, c));
+                        expect(g(a, b, _)(c)).toEqual(f3(a, b, c));
+                    }
+                )
+            );
+        });
     });
 });
